@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EmployeeList from './EmployeeList';
 import AddEmployeeForm from './AddEmployeeForm';
 import AttendanceMap from './AttendanceMap';
-import IndianMPMap from './IndianMPMap';
 import AttendanceList from './AttendanceList';
 
 const AdminDashboard = ({ user, onLogout }) => {
@@ -78,7 +76,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-semibold text-gray-900">MP Attendance Admin Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Employee Attendance Admin Dashboard</h1>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">Welcome, {user.name}</span>
               <Button variant="outline" onClick={onLogout} size="sm">
@@ -95,7 +93,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             variant={activeTab === 'employees' ? 'default' : 'outline'}
             onClick={() => setActiveTab('employees')}
           >
-            MP List
+            Employee List
           </Button>
           <Button 
             variant={activeTab === 'attendance-list' ? 'default' : 'outline'}
@@ -104,22 +102,16 @@ const AdminDashboard = ({ user, onLogout }) => {
             Attendance List
           </Button>
           <Button 
-            variant={activeTab === 'indian-map' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('indian-map')}
-          >
-            India MP Map
-          </Button>
-          <Button 
             variant={activeTab === 'add' ? 'default' : 'outline'}
             onClick={() => setActiveTab('add')}
           >
-            Add MP
+            Add Employee
           </Button>
           <Button 
             variant={activeTab === 'map' ? 'default' : 'outline'}
             onClick={() => setActiveTab('map')}
           >
-            Location Map
+            India Map
           </Button>
         </div>
 
@@ -129,12 +121,6 @@ const AdminDashboard = ({ user, onLogout }) => {
 
         {activeTab === 'attendance-list' && (
           <AttendanceList employees={employees} />
-        )}
-
-        {activeTab === 'indian-map' && (
-          <div key="indian-mp-map">
-            <IndianMPMap mpData={employees} />
-          </div>
         )}
 
         {activeTab === 'add' && (

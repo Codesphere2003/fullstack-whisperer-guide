@@ -46,7 +46,7 @@ const EmployeeDashboard = ({ user, onLogout }) => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-semibold text-gray-900">MP Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Employee Dashboard</h1>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">Welcome, {user.name}</span>
               <Button variant="outline" onClick={onLogout} size="sm">
@@ -99,7 +99,7 @@ const EmployeeDashboard = ({ user, onLogout }) => {
                     <p className="text-lg">{user.email}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Constituency</p>
+                    <p className="text-sm font-medium text-gray-500">Assigned Shop</p>
                     <p className="text-lg">{user.assignedShop.name}</p>
                   </div>
                 </div>
