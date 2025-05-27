@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CheckInButton from './CheckInButton';
 import EmployeeMap from './EmployeeMap';
-import { MapPin, Clock, User } from 'lucide-react';
+import EmployeeAttendanceView from './EmployeeAttendanceView';
+import { MapPin, Clock, User, Calendar } from 'lucide-react';
 
 const EmployeeDashboard = ({ user, onLogout }) => {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [checkInStatus, setCheckInStatus] = useState({
     hasCheckedIn: false,
     status: 'Not Checked In',
@@ -55,86 +57,114 @@ const EmployeeDashboard = ({ user, onLogout }) => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Profile Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User size={20} />
-              Profile Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Name</p>
-                <p className="text-lg">{user.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Email</p>
-                <p className="text-lg">{user.email}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Assigned Shop</p>
-                <p className="text-lg">{user.assignedShop.name}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Tab Navigation */}
+        <div className="flex gap-2 mb-6">
+          <Button 
+            variant={activeTab === 'dashboard' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('dashboard')}
+            className="flex items-center gap-2"
+          >
+            <User size={16} />
+            Dashboard
+          </Button>
+          <Button 
+            variant={activeTab === 'attendance' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('attendance')}
+            className="flex items-center gap-2"
+          >
+            <Calendar size={16} />
+            My Attendance
+          </Button>
+        </div>
 
-        {/* Check-in Status Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock size={20} />
-              Today's Check-in Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between mb-4">
-              <Badge className={getStatusColor(checkInStatus.status)}>
-                {checkInStatus.status}
-              </Badge>
-              {checkInStatus.time && (
-                <span className="text-sm text-gray-600">
-                  Checked in at {checkInStatus.time}
-                </span>
-              )}
-            </div>
-            
-            {!checkInStatus.hasCheckedIn && isCheckInTime() && (
-              <CheckInButton 
-                assignedShop={user.assignedShop} 
-                onCheckIn={handleCheckIn}
-              />
-            )}
-            
-            {!checkInStatus.hasCheckedIn && !isCheckInTime() && (
-              <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md">
-                <p className="text-sm text-yellow-800">
-                  Check-in is only available between 9:00 AM and 5:00 PM
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6">
+            {/* Profile Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User size={20} />
+                  Profile Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Name</p>
+                    <p className="text-lg">{user.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Email</p>
+                    <p className="text-lg">{user.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Assigned Shop</p>
+                    <p className="text-lg">{user.assignedShop.name}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Map Card */}
-        {checkInStatus.location && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin size={20} />
-                Check-in Location
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EmployeeMap 
-                checkInLocation={checkInStatus.location}
-                assignedShop={user.assignedShop}
-              />
-            </CardContent>
-          </Card>
+            {/* Check-in Status Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock size={20} />
+                  Today's Check-in Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between mb-4">
+                  <Badge className={getStatusColor(checkInStatus.status)}>
+                    {checkInStatus.status}
+                  </Badge>
+                  {checkInStatus.time && (
+                    <span className="text-sm text-gray-600">
+                      Checked in at {checkInStatus.time}
+                    </span>
+                  )}
+                </div>
+                
+                {!checkInStatus.hasCheckedIn && isCheckInTime() && (
+                  <CheckInButton 
+                    assignedShop={user.assignedShop} 
+                    onCheckIn={handleCheckIn}
+                  />
+                )}
+                
+                {!checkInStatus.hasCheckedIn && !isCheckInTime() && (
+                  <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md">
+                    <p className="text-sm text-yellow-800">
+                      Check-in is only available between 9:00 AM and 5:00 PM
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Map Card */}
+            {checkInStatus.location && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin size={20} />
+                    Check-in Location
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EmployeeMap 
+                    checkInLocation={checkInStatus.location}
+                    assignedShop={user.assignedShop}
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'attendance' && (
+          <EmployeeAttendanceView user={user} />
         )}
       </div>
     </div>

@@ -17,12 +17,7 @@ const AttendanceMap = ({ employees, shops }) => {
   const mapInstance = useRef(null);
 
   useEffect(() => {
-    console.log('AttendanceMap mounting with employees:', employees, 'shops:', shops);
-    
-    if (!mapRef.current) {
-      console.log('Map ref not available');
-      return;
-    }
+    if (!mapRef.current) return;
 
     // Clean up previous map instance
     if (mapInstance.current) {
@@ -30,100 +25,81 @@ const AttendanceMap = ({ employees, shops }) => {
       mapInstance.current = null;
     }
 
-    // Small delay to ensure DOM is ready
     setTimeout(() => {
       try {
-        // Initialize map centered on NYC
+        // Initialize map centered on India
         mapInstance.current = L.map(mapRef.current, {
-          center: [40.7128, -74.0060],
-          zoom: 12,
+          center: [20.5937, 78.9629], // Center of India
+          zoom: 5,
           zoomControl: true,
           scrollWheelZoom: true
         });
 
-        console.log('Map initialized successfully');
-
         // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors',
-          maxZoom: 19,
+          maxZoom: 18,
         }).addTo(mapInstance.current);
 
-        // Add shop markers (blue)
-        if (shops && shops.length > 0) {
-          console.log('Adding shop markers:', shops.length);
-          shops.forEach(shop => {
-            const shopIcon = L.divIcon({
-              className: 'custom-shop-marker',
-              html: '<div style="background-color: #2563eb; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.4); z-index: 1000;">S</div>',
-              iconSize: [28, 28],
-              iconAnchor: [14, 14]
+        // Add shop markers (assigned locations)
+        shops.forEach(shop => {
+          const shopIcon = L.divIcon({
+            className: 'custom-shop-marker',
+            html: `<div style="background-color: #3b82f6; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">S</div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          L.marker([shop.lat, shop.lng], { icon: shopIcon })
+            .addTo(mapInstance.current)
+            .bindPopup(`<div style="text-align: center; padding: 8px;"><b>${shop.name}</b><br/>Shop Location</div>`);
+        });
+
+        // Add employee markers with status-based colors
+        employees.forEach(employee => {
+          if (employee.checkInLocation) {
+            let color, symbol;
+            
+            switch (employee.status) {
+              case 'Present':
+                color = '#16a34a'; // Green
+                symbol = '✓';
+                break;
+              case 'Absent':
+                color = '#dc2626'; // Red
+                symbol = '✗';
+                break;
+              case 'Out of Range':
+                color = '#f59e0b'; // Orange
+                symbol = '!';
+                break;
+              case 'Late':
+                color = '#ea580c'; // Orange-red
+                symbol = '!';
+                break;
+              default:
+                color = '#9ca3af'; // Gray
+                symbol = '?';
+            }
+            
+            const employeeIcon = L.divIcon({
+              className: 'custom-employee-marker',
+              html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${symbol}</div>`,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
             });
 
-            L.marker([shop.lat, shop.lng], { icon: shopIcon })
+            L.marker([employee.checkInLocation.lat, employee.checkInLocation.lng], { icon: employeeIcon })
               .addTo(mapInstance.current)
-              .bindPopup(`<div style="text-align: center; padding: 8px;"><b>${shop.name}</b><br/>Shop Location</div>`);
+              .bindPopup(`<div style="text-align: center; padding: 8px; min-width: 120px;">
+                <b>${employee.name}</b><br/>
+                <span style="color: ${color}; font-weight: bold;">${employee.status}</span><br/>
+                ${employee.checkInTime ? `Time: ${employee.checkInTime}` : 'No check-in time'}
+              </div>`);
+          }
+        });
 
-            // Add circle around shop location to show valid range
-            L.circle([shop.lat, shop.lng], {
-              color: '#2563eb',
-              fillColor: '#2563eb',
-              fillOpacity: 0.1,
-              weight: 2,
-              radius: 200 // 200 meters
-            }).addTo(mapInstance.current);
-          });
-        }
-
-        // Add employee check-in markers with proper color coding
-        if (employees && employees.length > 0) {
-          console.log('Adding employee markers:', employees.length);
-          employees.forEach(employee => {
-            if (employee.checkInLocation) {
-              let color, symbol, statusText;
-              
-              // Enhanced color coding based on status
-              switch (employee.status) {
-                case 'Present':
-                  color = '#16a34a'; // Green
-                  symbol = '✓';
-                  statusText = 'Present';
-                  break;
-                case 'Out of Range':
-                  color = '#dc2626'; // Red
-                  symbol = '✗';
-                  statusText = 'Out of Range';
-                  break;
-                case 'Absent':
-                  color = '#9ca3af'; // Gray
-                  symbol = '?';
-                  statusText = 'Absent';
-                  break;
-                default:
-                  color = '#f59e0b'; // Orange
-                  symbol = '?';
-                  statusText = 'Unknown';
-              }
-              
-              const employeeIcon = L.divIcon({
-                className: 'custom-employee-marker',
-                html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.4); z-index: 1001;">${symbol}</div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
-              });
-
-              L.marker([employee.checkInLocation.lat, employee.checkInLocation.lng], { icon: employeeIcon })
-                .addTo(mapInstance.current)
-                .bindPopup(`<div style="text-align: center; padding: 10px; min-width: 120px;">
-                  <b style="color: ${color};">${employee.name}</b><br/>
-                  <span style="color: ${color}; font-weight: bold;">Status: ${statusText}</span><br/>
-                  ${employee.checkInTime ? `Time: ${employee.checkInTime}` : 'No check-in time'}
-                </div>`);
-            }
-          });
-        }
-
-        // Force map to invalidate size after everything is loaded
+        // Force map to invalidate size
         setTimeout(() => {
           if (mapInstance.current) {
             mapInstance.current.invalidateSize();
@@ -131,7 +107,7 @@ const AttendanceMap = ({ employees, shops }) => {
         }, 100);
 
       } catch (error) {
-        console.error('Error initializing map:', error);
+        console.error('Error initializing attendance map:', error);
       }
     }, 50);
 
@@ -144,26 +120,25 @@ const AttendanceMap = ({ employees, shops }) => {
   }, [employees, shops]);
 
   return (
-    <Card className="shadow-lg border-0">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-        <CardTitle className="text-xl text-gray-900">Live Attendance Map</CardTitle>
-        
+    <Card className="shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-xl text-gray-900">Employee Attendance Map - India</CardTitle>
         <div className="flex flex-wrap gap-4 text-sm mt-3">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-blue-600 rounded-full shadow-sm border-2 border-white"></div>
-            <span className="text-gray-700 font-medium">Shop Locations</span>
+            <div className="w-4 h-4 bg-green-600 rounded-full shadow-sm border border-white"></div>
+            <span className="text-gray-700">Present</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-green-600 rounded-full shadow-sm border-2 border-white"></div>
-            <span className="text-gray-700 font-medium">Present</span>
+            <div className="w-4 h-4 bg-red-600 rounded-full shadow-sm border border-white"></div>
+            <span className="text-gray-700">Absent</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-red-600 rounded-full shadow-sm border-2 border-white"></div>
-            <span className="text-gray-700 font-medium">Out of Range</span>
+            <div className="w-4 h-4 bg-orange-500 rounded-full shadow-sm border border-white"></div>
+            <span className="text-gray-700">Out of Range/Late</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-gray-500 rounded-full shadow-sm border-2 border-white"></div>
-            <span className="text-gray-700 font-medium">Absent</span>
+            <div className="w-4 h-4 bg-blue-600 rounded-full shadow-sm border border-white"></div>
+            <span className="text-gray-700">Shop Location</span>
           </div>
         </div>
       </CardHeader>
